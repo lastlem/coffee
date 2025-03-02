@@ -18,7 +18,7 @@ class EditCoffee(QDialog, Ui_Dialog):
             self.load_element()
 
     def load_element(self):
-        conn = sqlite3.connect('coffee.sqlite')
+        conn = sqlite3.connect('data/coffee.sqlite')
         cur = conn.cursor()
         res = cur.execute("SELECT * FROM coffee WHERE id = ?", (self.coffe_id,)).fetchone()
 
@@ -43,7 +43,7 @@ class EditCoffee(QDialog, Ui_Dialog):
             QMessageBox.warning(self, "Error", "Все поля должны быть заполнены")
             return
 
-        conn = sqlite3.connect('coffee.sqlite')
+        conn = sqlite3.connect('data/coffee.sqlite')
         cur = conn.cursor()
         if self.coffe_id:
             cur.execute(
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.editButton.clicked.connect(self.edit_coffee)
 
     def load_data(self):
-        conn = sqlite3.connect('coffee.sqlite')
+        conn = sqlite3.connect('data/coffee.sqlite')
         cur = conn.cursor()
 
         result = cur.execute("SELECT * FROM coffee").fetchall()
