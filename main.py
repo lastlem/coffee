@@ -34,8 +34,8 @@ class EditCoffee(QDialog):
         roast = self.roastLineEdit.text()
         grounded_beans = self.groundedBeansLineEdit.text()
         taste = self.tasteLineEdit.text()
-        price = float(self.priceLineEdit.text())
-        volume = float(self.volumeLineEdit.text())
+        price = self.priceLineEdit.text()
+        volume = self.volumeLineEdit.text()
 
         if not name or not roast or not grounded_beans or not taste or not price or not volume:
             QMessageBox.warning(self, "Error", "Все поля должны быть заполнены")
