@@ -38,7 +38,7 @@ class EditCoffee(QDialog):
         volume = float(self.volumeLineEdit.text())
 
         if not name or not roast or not grounded_beans or not taste or not price or not volume:
-            QMessageBox(self, "Error", "Все поля должны быть заполнены")
+            QMessageBox.warning(self, "Error", "Все поля должны быть заполнены")
             return
 
         conn = sqlite3.connect('coffee.sqlite')
