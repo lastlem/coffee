@@ -1,14 +1,69 @@
 import sqlite3
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QDialog, QMessageBox
 from PyQt6.uic import loadUi
 
 
-class Window(QMainWindow):
+class EditCoffee(QDialog):
+    def __init__(self, parent=None, coffee_id=None):
+        super().__init__(parent)
+        loadUi('addEditCoffeeForm.ui', self)
+        self.coffe_id = coffee_id
+        self.saveButton.clicked.connect(self.save_coffee)
+        self.cancelButton.clicked.connect(self.reject)
+
+        if self.coffe_id:
+            self.load_element()
+
+    def load_element(self):
+        conn = sqlite3.connect('coffee.sqlite')
+        cur = conn.cursor()
+        res = cur.execute("SELECT * FROM coffee WHERE id = ?", (self.coffe_id,)).fetchone()
+
+        if res:
+            self.nameLineEdit.setText(res[1])
+            self.roastLineEdit.setText(res[2])
+            self.groundedBeansLineEdit.setText(res[3])
+            self.tasteLineEdit.setText(res[4])
+            self.priceLineEdit.setText(str(res[5]))
+            self.volumeLineEdit.setText(str(res[6]))
+        conn.close()
+
+    def save_coffee(self):
+        name = self.nameLineEdit.text()
+        roast = self.roastLineEdit.text()
+        grounded_beans = self.groundedBeansLineEdit.text()
+        taste = self.tasteLineEdit.text()
+        price = float(self.priceLineEdit.text())
+        volume = float(self.volumeLineEdit.text())
+
+        if not name or not roast or not grounded_beans or not taste or not price or not volume:
+            QMessageBox(self, "Error", "Все поля должны быть заполнены")
+            return
+
+        conn = sqlite3.connect('coffee.sqlite')
+        cur = conn.cursor()
+        if self.coffe_id:
+            cur.execute(
+                "UPDATE coffee SET name=?, roast_level=?, grounded_beans=?, taste=?, price=?, volume=? WHERE id=?",
+                (name, roast, grounded_beans, taste, price, volume, self.coffe_id))
+        else:
+            cur.execute(
+                "INSERT INTO coffee (name, roast_level, grounded_beans, taste, price, volume) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, roast, grounded_beans, taste, price, volume))
+
+        conn.commit()
+        conn.close()
+        self.accept()
+
+
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         loadUi('main.ui', self)
         self.load_data()
+        self.addButton.clicked.connect(self.add_coffee)
+        self.editButton.clicked.connect(self.edit_coffee)
 
     def load_data(self):
         conn = sqlite3.connect('coffee.sqlite')
@@ -25,9 +80,25 @@ class Window(QMainWindow):
                 self.tableWidget.setItem(i, j, QTableWidgetItem(str(value)))
         conn.close()
 
+    def add_coffee(self):
+        dialog = EditCoffee(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.load_data()
+
+    def edit_coffee(self):
+        selected_row = int(self.tableWidget.currentRow())
+        if selected_row == -1:
+            QMessageBox.warning(self, "Error", 'Нужно выбрать ячейку таблицы, которую хотите редактировать')
+            return
+
+        coffe_id = self.tableWidget.item(selected_row, 0).text()
+        dialog = EditCoffee(self, coffe_id)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.load_data()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = Window()
+    ex = MainWindow()
     ex.show()
     sys.exit(app.exec())
