@@ -1,13 +1,15 @@
 import sqlite3
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QDialog, QMessageBox
-from PyQt6.uic import loadUi
+from UI.main_ui import Ui_MainWindow
+from UI.addEditCoffeeForm_ui import Ui_Dialog
 
 
-class EditCoffee(QDialog):
+class EditCoffee(QDialog, Ui_Dialog):
     def __init__(self, parent=None, coffee_id=None):
         super().__init__(parent)
-        loadUi('addEditCoffeeForm.ui', self)
+
+        self.setupUi(self)
         self.coffe_id = coffee_id
         self.saveButton.clicked.connect(self.save_coffee)
         self.cancelButton.clicked.connect(self.reject)
@@ -57,10 +59,11 @@ class EditCoffee(QDialog):
         self.accept()
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        loadUi('main.ui', self)
+
+        self.setupUi(self)
         self.load_data()
         self.addButton.clicked.connect(self.add_coffee)
         self.editButton.clicked.connect(self.edit_coffee)
